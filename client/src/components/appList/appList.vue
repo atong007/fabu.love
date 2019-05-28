@@ -16,6 +16,42 @@
           style="position: absolute;top: 0px;left: 0px;width: 144px;height: 48px;opacity: 0;cursor:pointer;">
       </div>
 
+
+      <!--++++++++++++++++-->
+      <!-- 添加by Atong007 -->
+      <!--++++++++++++++++-->
+      <div class="left">
+          <!--生成下载二维码-->
+          <div class="scan-code-list">
+            <el-popover
+              ref="popover"
+              placement="bottom-start"
+              width="144"
+              left="400"
+              @show="popovershow"
+              @hide="popoverhide"
+              trigger="click"
+              :disabled="!this.isAppList || originDataList.length === 0"
+              :visible-arrow="false">
+              <ul>
+                <li class="leftWrapper-item" v-for="(item, index) in this.appList" :key="index" @click="selectApp(item)">
+                  <p>
+                    {{item.appName}}
+                  </p>
+                </li>
+              </ul>
+            </el-popover>
+            <el-button class="scanCodeBtn" v-popover:popover @click="clickTeamBtn">{{this.selectedAppName}}  <i class="el-icon-arrow-down" ref="arrow"></i></el-button>
+
+            <el-button class="flagBtn" @click="clickFlagBtn" v-show="!isAppList"></el-button>
+          </div>
+        </div>
+        <!--++++++++++++++++-->
+        <!--    添加结束     -->
+        <!--++++++++++++++++-->
+
+
+
       <div class="applist-header-right">
         <div class="platform-wrapper">
           <div class="platform-ios" :class="getActiveClass('ios')" @click="clickIosPlatform">
@@ -66,7 +102,12 @@
         file: FileList,
         currentPage: 0,
         currentTeam: {},
-        showEmpty: false
+        showEmpty: false,
+
+        selectedAppName: '生成二维码',
+        appName: '',
+        isAppList: true,
+        appList: []
       }
     },
     components: {
@@ -87,6 +128,46 @@
             }
 
             console.log(this.dataList)
+
+
+            // ----------------------------------------
+            // 添加by Atong007
+            // ----------------------------------------
+
+            var newAppList = []
+            this.dataList.forEach((item) => {
+              var newAppItem = {}
+              var isNewApp = true
+              newAppList.every(function(element, index) {
+                if (element.appName === item.appName || element.appName === item.bundleName) {
+                  isNewApp = false
+                  if (item.platform === 'ios') {
+                    element.shortUrls = item.shortUrl + '#' + element.shortUrls
+                  } else {
+                    element.shortUrls += '#' + item.shortUrl
+                  }
+                }
+                return isNewApp !== false
+              })
+              if (isNewApp) {
+                if (item.appName !== undefined) {
+                  newAppItem.appName = item.appName
+                } else {
+                  newAppItem.appName = item.bundleName
+                }
+                newAppItem.shortUrls = item.shortUrl
+                newAppItem.platform = item.platform
+                newAppList.push(newAppItem)
+              }
+            })
+            console.log(newAppList)
+            this.appList = newAppList
+
+            // ----------------------------------------
+            // 添加by Atong007
+            // ----------------------------------------
+
+
           }, reject => {
             this.$message.error(reject)
             this.showEmpty = true
@@ -153,7 +234,53 @@
             })
           })
           .catch(_ => {})
+      },
+
+      // ----------------------------------------
+      // 添加by Atong007
+      // ----------------------------------------
+
+      selectApp(item) {
+        console.log('++++++++selectApp+++++++++++')
+        console.log(item)
+
+        // 模拟点击，取消弹框
+        document.querySelector('#app').click()
+
+        this.selectedAppName = item.appName
+
+        // 生成下载二维码
+        this.generateScanCode(item)
+        // 刷新app列表
+        // this.bus.$emit('refreshList')
+      },
+      clickTeamBtn() {
+        if (this.isAppList) {
+        } else {
+        }
+      },
+      clickFlagBtn() {
+        this.$router.push('/apps')
+      },
+      popovershow() {
+        this.$refs.arrow.style.transform = `rotate(-180deg)`
+      },
+      popoverhide() {
+        this.$refs.arrow.style.transform = `rotate(0deg)`
+      },
+
+      generateScanCode(item) {
+        const {href} = this.$router.resolve({
+          name: 'ScancodeDirection',
+          path: '/',
+          params: { 'id': item.shortUrls }
+        })
+        window.open(href, '_blank')
       }
+      // ----------------------------------------
+      // 结束添加
+      // ----------------------------------------
+
     },
     destroyed() {
       this.bus.$off('refreshList')
@@ -307,6 +434,14 @@
 
   .platformActive {
     background-color: #e0e4fc;
+  }
+
+  .scanCodeBtn {
+    background: #6477F2;
+    color: #FFF;
+    height: 48px;
+    border-radius: 24px;
+    margin-left: 20px;
   }
 
 </style>

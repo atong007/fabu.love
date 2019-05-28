@@ -59,6 +59,11 @@ export default new Router({
       path: '/:id',
       name: 'AppPreView',
       component: resolve => require(['@/components/appDetail/appPreView.vue'], resolve)
+    },
+    {
+      path: '/apps/:id',
+      name: 'ScancodeDirection',
+      component: resolve => require(['@/components/appDetail/scanCodeDirection.vue'], resolve)
     }
   ]
 })

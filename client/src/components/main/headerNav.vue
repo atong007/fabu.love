@@ -4,6 +4,7 @@
       <!--团队，切换团队-->
       <div class="team">
         <el-popover
+          class="teams-popover"
           ref="popover"
           placement="bottom-start"
           width="220"
@@ -223,7 +224,7 @@
 
   .headernav-wrapper {
   }
-  .el-popover {
+  .teams-popover {
     top: 60px !important;
     left: 200px !important;
   }

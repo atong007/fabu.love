@@ -134,7 +134,7 @@ async function parseAppAndInsertToDB(file, user, team) {
         info.shortUrl = Math.random().toString(36).substring(2, 5) + Math.random().toString(36).substring(2, 5);
         app = new App(info)
         app.ownerId = team._id;
-        app.currentVersion = info.versionCode
+        app.currentVersion = app.platform == 'ios' ? info.versionStr : info.versionCode//info.versionCode
         await app.save()
         info.uploader = user.username;
         info.uploaderId = user._id;
@@ -149,7 +149,8 @@ async function parseAppAndInsertToDB(file, user, team) {
         await version.save()
         return { 'app': app, 'version': version }
     }
-    var version = await Version.findOne({ appId: app.id, versionCode: info.versionCode })
+    console.log('app info ----> ', info)
+    var version = await Version.findOne({ appId: app.id, versionStr: app.platform == 'ios' ? info.versionStr : info.versionCode})//versionCode: info.versionCode })
     if (!version) {
         info.uploader = user.username;
         info.uploaderId = user._id;
@@ -370,10 +371,16 @@ String.prototype.format = function() {
 }
 
 function parseText(text) {
+    var replaceText = text
+    if (text.includes('V ')) {
+      replaceText = text.replace('V ', 'V')
+    }else if (text.includes('v ')) {
+      replaceText = text.replace('v ', 'V')
+    }
     var regx = /(\w+)='([\S]+)'/g
-    var match = null;
+    var match = null
     var result = {}
-    while (match = regx.exec(text)) {
+    while (match = regx.exec(replaceText)) {
         result[match[1]] = match[2]
     }
     return result
