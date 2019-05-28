@@ -88,6 +88,10 @@
     padding-bottom: 60px;
   }
 
+  .main-contentWrapper {
+    background-color: #F4F5F7 !important;
+  }
+
   .main .main-contentWrapper:after {
     display: inline-block;
     font-size: 14px;
